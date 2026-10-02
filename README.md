@@ -2,6 +2,8 @@
 
 Projeto desenvolvido para implementar um sistema distribuído de conversão e armazenamento de imagens utilizando **RabbitMQ**, **Python** e **Docker**.
 
+# !!PS: Está tudo em um só commit, porque fiz tudo localmente e testando e por último fiz o repositório!! #
+
 O sistema permite a execução de múltiplos clientes, servidores de conversão e servidores de armazenamento.
 
 ## Funcionamento
