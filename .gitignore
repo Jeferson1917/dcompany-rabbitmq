@@ -1,0 +1,20 @@
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Ambientes virtuais
+.venv/
+venv/
+
+# Imagens geradas pelos servidores de armazenamento
+output/storage1/*
+output/storage2/*
+
+# Mantém as pastas de saída no repositório
+!output/storage1/.gitkeep
+!output/storage2/.gitkeep
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db

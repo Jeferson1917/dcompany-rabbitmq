@@ -1,0 +1,150 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: dcompany-rabbitmq
+
+    environment:
+      RABBITMQ_DEFAULT_USER: dcompany
+      RABBITMQ_DEFAULT_PASS: dcompany123
+
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+  converter1:
+    build: .
+    container_name: dcompany-converter1
+
+    command: python converter/converter.py
+
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: dcompany
+      RABBITMQ_PASSWORD: dcompany123
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  converter2:
+    build: .
+    container_name: dcompany-converter2
+
+    command: python converter/converter.py
+
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: dcompany
+      RABBITMQ_PASSWORD: dcompany123
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  storage1:
+    build: .
+    container_name: dcompany-storage1
+
+    command: python storage/storage.py storage1 /output/storage1
+
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: dcompany
+      RABBITMQ_PASSWORD: dcompany123
+
+    volumes:
+      - ./output/storage1:/output/storage1
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  storage2:
+    build: .
+    container_name: dcompany-storage2
+
+    command: python storage/storage.py storage2 /output/storage2
+
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: dcompany
+      RABBITMQ_PASSWORD: dcompany123
+
+    volumes:
+      - ./output/storage2:/output/storage2
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  client1:
+    build: .
+    container_name: dcompany-client1
+
+    command: python client/client.py /images/client1
+
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: dcompany
+      RABBITMQ_PASSWORD: dcompany123
+
+    volumes:
+      - ./images/client1:/images/client1:ro
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      converter1:
+        condition: service_started
+      converter2:
+        condition: service_started
+      storage1:
+        condition: service_started
+      storage2:
+        condition: service_started
+
+
+  client2:
+    build: .
+    container_name: dcompany-client2
+
+    command: python client/client.py /images/client2
+
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: dcompany
+      RABBITMQ_PASSWORD: dcompany123
+
+    volumes:
+      - ./images/client2:/images/client2:ro
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      converter1:
+        condition: service_started
+      converter2:
+        condition: service_started
+      storage1:
+        condition: service_started
+      storage2:
+        condition: service_started
